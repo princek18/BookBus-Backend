@@ -87,7 +87,7 @@ userRouter.put('/updateprofile', authToken, async (req, res) => {
         if (req.body.mobile.length === 10) {
             userD.mobile = req.body.mobile
         }
-        if (req.body.npassword.length > 6) {
+        if (req.body.npassword && req.body.npassword.length > 6) {
             userD.password = req.body.npassword
         }
         await userD.save();

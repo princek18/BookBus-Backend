@@ -1,6 +1,4 @@
 const Mongoose = require("mongoose");
-const validator = require("validator");
-const bcryptjs = require("bcryptjs");
 
 const BusSchema = new Mongoose.Schema({
     busNumber: {
@@ -41,6 +39,10 @@ const BusSchema = new Mongoose.Schema({
     },
     tickets: {
         type: Object,
+        required: true
+    },
+    fare: {
+        type: Number,
         required: true
     }
 });

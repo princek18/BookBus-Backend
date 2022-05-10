@@ -38,7 +38,8 @@ busRouter.get("/getdropdwonvalues", authToken, async (req, res) => {
         value: "Seater",
       },
     ];
-    res.send({ location, busType, journeyClass });
+    const arrUniq = [...new Map(location.map(v => [v.value, v])).values()]
+    res.send({ location: arrUniq, busType, journeyClass });
   } catch (e) {
     res.status(400).send({ message: e.message });
   }
@@ -69,6 +70,7 @@ busRouter.post("/searchbuses", authToken, async (req, res) => {
           departureTime: buses[i].departureTime,
           arrivalTime: buses[i].arrivalTime,
           busNumber: buses[i].busNumber,
+          fare: buses[i].fare,
           availableTickets,
         });
       }
@@ -83,5 +85,6 @@ busRouter.post("/searchbuses", authToken, async (req, res) => {
     res.status(400).send({ message: e.message });
   }
 });
+
 
 module.exports = busRouter;

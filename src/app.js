@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const userRouter = require("./Routes/UsersRoute");
 const busRouter = require("./Routes/BusesRoute.js");
+const ticketRouter = require("./Routes/TicketRoute.js");
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(
 
 app.use(userRouter);
 app.use(busRouter);
+app.use(ticketRouter);
 
 
 app.listen(process.env.PORT, () => {
