@@ -1,6 +1,6 @@
 const {Router} = require("express");
 const UsersModel = require("../Models/UsersModel");
-const { authUser, getAuthToken, authToken } = require("../utils/utils");
+const { authUser, getAuthToken, authToken, getAdminAuthToken } = require("../utils/utils");
 
 const userRouter = new Router();
 
@@ -23,8 +23,14 @@ userRouter.post('/login', async (req, res) => {
         return res.status(404).send({message: "Please provide email and password."})
     }
     try{
-        const user = await authUser(req.body.email, req.body.password);
-        const authToken = await getAuthToken(user);
+        let authToken;
+        const user = await authUser(req.body.email, req.body.password, req.body.userType);
+        if (req.body.userType === "Admin") {
+            authToken = await getAdminAuthToken(user);
+        }
+        else {
+        authToken = await getAuthToken(user);
+        }
         res.send({user, authToken});
     }catch(e){
         res.status(400).send({message: e.message});
@@ -47,7 +53,7 @@ userRouter.get('/getwallet', authToken, async (req, res) => {
 userRouter.put('/addMoney', authToken, async (req, res) => {
     try{
         let user = await UsersModel.findOne({_id: req.user._id});
-        const userD = await authUser(user.email, req.body.password);
+        const userD = await authUser(user.email, req.body.password, user.userType);
 
         userD.wallet += Number(req.body.money);
         await userD.save();
@@ -74,7 +80,7 @@ userRouter.get('/getprofile', authToken, async (req, res) => {
 userRouter.put('/updateprofile', authToken, async (req, res) => {
     try{
         let user = await UsersModel.findOne({_id: req.user._id});
-        const userD = await authUser(user.email, req.body.password);
+        const userD = await authUser(user.email, req.body.password, user.userType);
         if (req.body.email.length > 5) {
             userD.email = req.body.email
         }
