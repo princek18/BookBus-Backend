@@ -3,6 +3,7 @@ const BusesModel = require("../Models/BusesModel");
 const TicketsModel = require('../Models/TicketModel');
 const UsersModel = require("../Models/UsersModel");
 const { authToken, authUser, authAdminToken } = require("../utils/utils");
+const moment = require("moment");
 
 const ticketRouter = new Router();
 
@@ -109,6 +110,12 @@ ticketRouter.delete('/deleteticket', authAdminToken, async (req, res) => {
         let bus = await BusesModel.findOne({_id: ticket.busId});
         for (let i = 0; i < ticket.seats.length; i++) {
             bus.tickets[ticket.journeyDate][ticket.seats[i]] = "false";
+        }
+        let today = moment().format('yyyy-MM-DD');
+        if (ticket.journeyDate > today) {
+            let user = await UsersModel.findOne({_id: ticket.userId});
+            user.wallet += Number(ticket.fare);
+            await user.save();
         }
         await TicketsModel.deleteOne({_id: req.query.ticketId})
         bus.markModified("tickets");
