@@ -2,7 +2,7 @@ const { Router } = require("express");
 const BusesModel = require("../Models/BusesModel");
 const TicketsModel = require('../Models/TicketModel');
 const UsersModel = require("../Models/UsersModel");
-const { authToken, authUser, authAdminToken } = require("../utils/utils");
+const { authToken, authUser, authAdminToken, sendTicketToEmail } = require("../utils/utils");
 const moment = require("moment");
 
 const ticketRouter = new Router();
@@ -67,6 +67,31 @@ ticketRouter.post('/getticket', authToken, async (req, res) => {
         res.status(400).send({ message: e.message });
     }
 });
+
+ticketRouter.post('/sendtickettoemail', authToken, async (req, res) => {
+    if (!req.body.ticketId) {
+        return res.status(404).send({message: "Ticket Id missing!"})
+    }
+    try{   
+        let ticket = await TicketsModel.findOne({_id: req.body.ticketId})
+        if (!ticket) {
+            return res.status(404).send({message: "Invalid request."})
+        }
+        let bus = await BusesModel.findOne({_id: ticket.busId});
+        if (!bus) {
+            return res.status(404).send({message: "Invalid request."})
+        }
+        const email = req.user.email;
+        let data = await sendTicketToEmail(ticket, bus, email);
+        if (!data) {
+            res.status(400).send({message: "Error Occured!"});
+            }
+        res.send({message: "Ticket sent to your Email!"})
+    }
+    catch(e){
+        res.status(400).send({ message: e.message });
+    }
+})
 
 ticketRouter.post('/getallticket', authToken, async (req, res) => {
     if (!req.body.userId) {

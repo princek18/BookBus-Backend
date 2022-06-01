@@ -1,6 +1,6 @@
 const {Router} = require("express");
 const UsersModel = require("../Models/UsersModel");
-const { authUser, getAuthToken, authToken, getAdminAuthToken } = require("../utils/utils");
+const { authUser, getAuthToken, authToken, getAdminAuthToken, getResetPasswordToken, sendResetEmail } = require("../utils/utils");
 
 const userRouter = new Router();
 
@@ -33,6 +33,46 @@ userRouter.post('/login', async (req, res) => {
         }
         res.send({user, authToken});
     }catch(e){
+        res.status(400).send({message: e.message});
+    }
+})
+
+userRouter.post('/resetpassword', async (req, res) => {
+    if(!req.body?.email){
+        return res.status(404).send({message: "Please provide email!"})
+    }
+    try{
+        const user = await UsersModel.findOne({email: req.body.email});
+        if (!user) {
+            return res.status(404).send({message: "Email not found!"});
+        }
+        const email = user.email;
+        const token = await getResetPasswordToken(user);
+        let data = await sendResetEmail(email, token);
+        if (!data) {
+        res.status(400).send({message: "Error Occured!"});
+        }
+        res.send({message: "Check Email for Reset Password Link!"})
+    }
+    catch(e){
+        res.status(400).send({message: e.message});
+    }
+});
+
+userRouter.post('/resetpasswordset', async (req, res) => {
+    if(!req.body?.userId || !req.body?.password){
+        return res.status(404).send({message: "Please provide correct data!"})
+    }
+    try{
+        const user = await UsersModel.findOne({_id: req.body.userId});
+        if (!user) {
+            return res.status(404).send({message: "Invalid user!"});
+        }
+        user.password = req.body.password;
+        await user.save();
+        res.send({message: "Password changed successfully!"});
+    }
+    catch(e){
         res.status(400).send({message: e.message});
     }
 })
