@@ -77,7 +77,7 @@ const sendResetEmail = async (email, token) => {
                 email: "prince1815902@gmail.com"
             },
             subject: "Reset Password",
-            html: `<h1>Reset Password Link:</h1><br>This link is valid for 5 Minutes only!<br><a href="http://localhost:3000/reset?auth=${token}">Reset Link</a>`
+            html: `<h1>Reset Password Link:</h1><br>This link is valid for 5 Minutes only!<br><a href="https://book-bus.netlify.app/reset?auth=${token}">Reset Link</a>`
         }
         return sgMail.send(message)
 }
